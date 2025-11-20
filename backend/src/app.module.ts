@@ -1,8 +1,9 @@
 import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common'
 import { LoggingMiddleware } from './middleware'
+import { FilmsModule } from './modules'
 
 @Module({
-    imports: [],
+    imports: [FilmsModule],
     controllers: [],
     providers: []
 })
