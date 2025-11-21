@@ -1,0 +1,47 @@
+.films-search {
+    margin-bottom: 0.5rem;
+
+    &__wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    &__icon {
+        position: absolute;
+        left: 1rem;
+        color: rgba(255, 255, 255, 0.5);
+        pointer-events: none;
+        z-index: 1;
+    }
+
+    &__input {
+        width: 100%;
+        padding: 0.875rem 1rem 0.875rem 3rem;
+        background: linear-gradient(135deg, rgba(30, 30, 30, 0.9) 0%, rgba(20, 20, 20, 0.95) 100%);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        color: #ffffff;
+        font-size: 1rem;
+        transition:
+            border-color 0.3s ease,
+            box-shadow 0.3s ease;
+
+        &::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        &:focus {
+            outline: none;
+            border-color: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        &:hover {
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+    }
+}
+

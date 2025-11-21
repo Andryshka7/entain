@@ -3,23 +3,35 @@ import { createSlice } from '@reduxjs/toolkit'
 import type { TMDBFilm } from '@/types'
 
 interface FilmsState {
+    isLoading: boolean
+    searchQuery: string
     currentPage: number
-    pages: { [key: number]: TMDBFilm[] }
     totalPages: number
+    results: {
+        [page: number]: TMDBFilm[]
+    }
 }
 
 const initialState: FilmsState = {
+    isLoading: true,
+    searchQuery: '',
     currentPage: 1,
     totalPages: 5,
-    pages: {}
+    results: {}
 }
 
 const filmsSlice = createSlice({
     name: 'films',
     initialState,
     reducers: {
+        setIsLoading: (state, action: PayloadAction<boolean>) => {
+            state.isLoading = action.payload
+        },
         setPage: (state, action: PayloadAction<number>) => {
             state.currentPage = action.payload
+        },
+        setSearchQuery: (state, action: PayloadAction<string>) => {
+            state.searchQuery = action.payload
         },
         setFilms: (
             state,
@@ -30,13 +42,24 @@ const filmsSlice = createSlice({
             }>
         ) => {
             const { page, totalPages, films } = action.payload
-            state.currentPage = page
-            state.totalPages = totalPages
-            state.pages[page] = films
+
+            return {
+                ...state,
+                isLoading: false,
+                totalPages: Math.min(totalPages, 500),
+                results: {
+                    ...state.results,
+                    [page]: films
+                }
+            }
+        },
+        resetFilms: (state) => {
+            state.isLoading = true
+            state.results = {}
         }
     }
 })
 
-export const { setPage, setFilms } = filmsSlice.actions
+export const { setPage, setFilms, setSearchQuery, resetFilms } = filmsSlice.actions
 
 export default filmsSlice.reducer

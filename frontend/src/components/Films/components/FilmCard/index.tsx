@@ -1,5 +1,6 @@
 import type { TMDBFilm } from '@/types'
 import { Star } from 'lucide-react'
+import './index.scss'
 
 interface Props {
     film: TMDBFilm
@@ -32,9 +33,7 @@ const FilmCard = ({ film }: Props) => {
                 <p className='film-card__year'>{releaseYear}</p>
                 {film.overview && (
                     <p className='film-card__overview' title={film.overview}>
-                        {film.overview.length > 120
-                            ? `${film.overview.slice(0, 120)}...`
-                            : film.overview}
+                        {film.overview}
                     </p>
                 )}
             </div>

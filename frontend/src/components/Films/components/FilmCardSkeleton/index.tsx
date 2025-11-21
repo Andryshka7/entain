@@ -1,3 +1,6 @@
+import '../FilmCard/index.scss'
+import './index.scss'
+
 const FilmCardSkeleton = () => {
     return (
         <div className='film-card film-card--skeleton'>

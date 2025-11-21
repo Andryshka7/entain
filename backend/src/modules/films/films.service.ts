@@ -6,9 +6,11 @@ import type { Cache } from 'cache-manager'
 
 @Injectable()
 export class FilmsService {
-    private readonly baseUrl = new URL('https://api.themoviedb.org/3/search/movie')
+    private readonly baseUrl: string
 
-    constructor(@Inject(CACHE_MANAGER) private cacheManager: Cache) {}
+    constructor(@Inject(CACHE_MANAGER) private cacheManager: Cache) {
+        this.baseUrl = 'https://api.themoviedb.org/3'
+    }
 
     async searchFilms(params: SearchFilmsParams) {
         const logger = new Logger('FilmsService')
@@ -16,7 +18,12 @@ export class FilmsService {
         try {
             const { query = '', page = 1 } = params
 
+            const endpoint = !query.trim()
+                ? `${this.baseUrl}/movie/popular`
+                : `${this.baseUrl}/search/movie`
+
             if (!TMDB_ACCESS_TOKEN) {
+                logger.error('TMDB access token is not configured')
                 throw new HttpException(
                     'TMDB access token is not configured',
                     HttpStatus.INTERNAL_SERVER_ERROR
@@ -33,9 +40,12 @@ export class FilmsService {
             let responseData = await this.cacheManager.get<TMDBResponse>(cacheKey)
 
             if (!responseData) {
-                const url = new URL(this.baseUrl.toString())
+                const url = new URL(endpoint)
 
-                url.searchParams.append('query', query)
+                // Only append query parameter for search endpoint
+                if (query.trim()) {
+                    url.searchParams.append('query', query)
+                }
                 url.searchParams.append('page', apiPage.toString())
 
                 const response = await fetch(url.toString(), {
@@ -46,7 +56,10 @@ export class FilmsService {
                     }
                 })
 
+                console.log(url.toString())
+
                 if (!response.ok) {
+                    logger.error(`TMDB API error: ${response.statusText}`, response.status)
                     throw new HttpException(
                         `TMDB API error: ${response.statusText}`,
                         response.status
