@@ -1,4 +1,4 @@
-import { Controller, Get, Query } from '@nestjs/common'
+import { Controller, Get, Query, Param } from '@nestjs/common'
 import { FilmsService } from './films.service'
 import { SearchFilmsParams } from '@/types'
 
@@ -14,5 +14,10 @@ export class FilmsController {
         }
 
         return this.filmsService.searchFilms(params)
+    }
+
+    @Get(':id')
+    async getFilmById(@Param('id') id: string) {
+        return this.filmsService.getFilmById(parseInt(id, 10))
     }
 }

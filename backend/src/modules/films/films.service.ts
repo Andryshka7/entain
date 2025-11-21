@@ -56,8 +56,6 @@ export class FilmsService {
                     }
                 })
 
-                console.log(url.toString())
-
                 if (!response.ok) {
                     logger.error(`TMDB API error: ${response.statusText}`, response.status)
                     throw new HttpException(
@@ -83,6 +81,54 @@ export class FilmsService {
                 results: slicedResults,
                 total_pages: totalPages
             }
+        } catch (error) {
+            logger.error(error)
+            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR)
+        }
+    }
+
+    async getFilmById(id: number) {
+        const logger = new Logger('FilmsService')
+
+        try {
+            if (!TMDB_ACCESS_TOKEN) {
+                logger.error('TMDB access token is not configured')
+                throw new HttpException(
+                    'TMDB access token is not configured',
+                    HttpStatus.INTERNAL_SERVER_ERROR
+                )
+            }
+
+            const cacheKey = `film:${id}`
+
+            let filmData = await this.cacheManager.get(cacheKey)
+
+            if (!filmData) {
+                const url = `${this.baseUrl}/movie/${id}`
+
+                const response = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        Authorization: `Bearer ${TMDB_ACCESS_TOKEN}`,
+                        accept: 'application/json'
+                    }
+                })
+
+                if (!response.ok) {
+                    logger.error(`TMDB API error: ${response.statusText}`, response.status)
+                    throw new HttpException(
+                        `TMDB API error: ${response.statusText}`,
+                        response.status
+                    )
+                }
+
+                filmData = await response.json()
+                await this.cacheManager.set(cacheKey, filmData)
+            } else {
+                logger.log(`Cache hit for film ID: ${id}`)
+            }
+
+            return filmData
         } catch (error) {
             logger.error(error)
             throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR)

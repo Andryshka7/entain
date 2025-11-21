@@ -24,9 +24,6 @@ const filmsSlice = createSlice({
     name: 'films',
     initialState,
     reducers: {
-        setIsLoading: (state, action: PayloadAction<boolean>) => {
-            state.isLoading = action.payload
-        },
         setPage: (state, action: PayloadAction<number>) => {
             state.currentPage = action.payload
         },
@@ -56,6 +53,7 @@ const filmsSlice = createSlice({
         resetFilms: (state) => {
             state.isLoading = true
             state.results = {}
+            state.currentPage = 1
         }
     }
 })
