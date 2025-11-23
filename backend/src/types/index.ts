@@ -3,6 +3,13 @@ interface SearchFilmsParams {
     page?: number
 }
 
+interface TMDBResponse {
+    page: number
+    results: TMDBFilm[]
+    total_pages: number
+    total_results: number
+}
+
 interface TMDBFilm {
     adult: boolean
     backdrop_path: string | null
@@ -18,13 +25,6 @@ interface TMDBFilm {
     video: boolean
     vote_average: number
     vote_count: number
-}
-
-interface TMDBResponse {
-    page: number
-    results: TMDBFilm[]
-    total_pages: number
-    total_results: number
 }
 
 export type { SearchFilmsParams, TMDBFilm, TMDBResponse }

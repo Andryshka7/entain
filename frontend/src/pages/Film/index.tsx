@@ -1,46 +1,48 @@
 import { ArrowLeft, Star, Calendar, Clock, Globe } from 'lucide-react'
 import { useParams, useNavigate } from 'react-router-dom'
+import { useAppDispatch, useAppSelector } from '@/hooks'
 import { FilmDetailSkeleton } from './components'
-import type { TMDBFilmDetails } from '@/types'
 import { useEffect, useState } from 'react'
+import { setFilmDetails } from '@/store'
 import { filmsApi } from '@/api'
 import './index.scss'
 
 const Film = () => {
-    const { id } = useParams<{ id: string }>()
     const navigate = useNavigate()
-    const [film, setFilm] = useState<TMDBFilmDetails | null>(null)
+    const dispatch = useAppDispatch()
+
+    const { id } = useParams<{ id: string }>()
+
+    const { filmDetails } = useAppSelector((state) => state.films)
+
     const [isLoading, setIsLoading] = useState(true)
-    const [error, setError] = useState<string | null>(null)
+
+    const film = filmDetails[parseInt(id!, 10)]
 
     useEffect(() => {
         const fetchFilm = async () => {
-            if (!id) return
+            if (!id || film) return
 
             try {
-                setIsLoading(true)
-                setError(null)
-                const filmData = await filmsApi.getFilmById(parseInt(id, 10))
-                setFilm(filmData)
-            } catch (err) {
-                setError(err instanceof Error ? err.message : 'Failed to fetch film')
+                const filmDetails = await filmsApi.getFilmById(parseInt(id, 10))
+                dispatch(setFilmDetails(filmDetails))
+            } catch (error) {
+                console.error(error)
             } finally {
                 setIsLoading(false)
             }
         }
 
         fetchFilm()
-    }, [id])
+    }, [id, film])
 
-    if (isLoading) {
-        return <FilmDetailSkeleton />
-    }
-
-    if (error || !film) {
-        return (
+    if (!film) {
+        return isLoading ? (
+            <FilmDetailSkeleton />
+        ) : (
             <div className='film-detail-error'>
                 <div className='film-detail-error__content'>
-                    <p className='film-detail-error__message'>{error || 'Film not found'}</p>
+                    <p className='film-detail-error__message'>Film not found</p>
                     <button className='film-detail-error__button' onClick={() => navigate('/')}>
                         <ArrowLeft size={16} />
                         Back to Films
@@ -53,6 +55,7 @@ const Film = () => {
     const backdropUrl = film.backdrop_path
         ? `https://image.tmdb.org/t/p/w1280${film.backdrop_path}`
         : null
+
     const posterUrl = film.poster_path ? `https://image.tmdb.org/t/p/w500${film.poster_path}` : null
 
     const releaseYear = film.release_date ? new Date(film.release_date).getFullYear() : 'N/A'

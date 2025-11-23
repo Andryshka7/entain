@@ -23,8 +23,8 @@ interface TMDBFilm {
 interface TMDBResponse {
     page: number
     results: TMDBFilm[]
-    total_pages: number
-    total_results: number
+    totalPages: number
+    totalResults: number
 }
 
 interface TMDBGenre {

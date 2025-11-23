@@ -3,22 +3,18 @@ import type { TMDBFilm } from '@/types'
 import { Star } from 'lucide-react'
 import './index.scss'
 
-interface Props {
-    film: TMDBFilm
-}
-
-const FilmCard = ({ film }: Props) => {
+const FilmCard = ({ id, title, poster_path, vote_average, release_date, overview }: TMDBFilm) => {
     const navigate = useNavigate()
 
-    const posterUrl = film.poster_path ? `https://image.tmdb.org/t/p/w500${film.poster_path}` : null
+    const posterUrl = poster_path ? `https://image.tmdb.org/t/p/w500${poster_path}` : null
 
-    const releaseYear = film.release_date ? new Date(film.release_date).getFullYear() : 'N/A'
+    const releaseYear = release_date ? new Date(release_date).getFullYear() : 'N/A'
 
     return (
-        <div className='film-card' onClick={() => navigate(`/film/${film.id}`)}>
+        <div className='film-card' onClick={() => navigate(`/film/${id}`)}>
             <div className='film-card__poster'>
                 {posterUrl ? (
-                    <img src={posterUrl} alt={film.title} loading='lazy' />
+                    <img src={posterUrl} alt={title} loading='lazy' />
                 ) : (
                     <div className='film-card__poster-placeholder'>
                         <span>No Image</span>
@@ -26,17 +22,17 @@ const FilmCard = ({ film }: Props) => {
                 )}
                 <div className='film-card__rating'>
                     <Star size={12} fill='currentColor' />
-                    <span>{film.vote_average.toFixed(1)}</span>
+                    <span>{vote_average.toFixed(1)}</span>
                 </div>
             </div>
             <div className='film-card__content'>
-                <h3 className='film-card__title' title={film.title}>
-                    {film.title}
+                <h3 className='film-card__title' title={title}>
+                    {title}
                 </h3>
                 <p className='film-card__year'>{releaseYear}</p>
-                {film.overview && (
-                    <p className='film-card__overview' title={film.overview}>
-                        {film.overview}
+                {overview && (
+                    <p className='film-card__overview' title={overview}>
+                        {overview}
                     </p>
                 )}
             </div>

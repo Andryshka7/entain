@@ -15,38 +15,35 @@ export class FilmsService {
     async searchFilms(params: SearchFilmsParams) {
         const logger = new Logger('FilmsService')
 
-        try {
-            const { query = '', page = 1 } = params
+        if (!TMDB_ACCESS_TOKEN) {
+            logger.error('TMDB access token is not configured')
+            throw new HttpException(
+                'TMDB access token is not configured',
+                HttpStatus.INTERNAL_SERVER_ERROR
+            )
+        }
 
-            const endpoint = !query.trim()
+        try {
+            const { query, page = 1 } = params
+
+            const endpoint = !query
                 ? `${this.baseUrl}/movie/popular`
                 : `${this.baseUrl}/search/movie`
 
-            if (!TMDB_ACCESS_TOKEN) {
-                logger.error('TMDB access token is not configured')
-                throw new HttpException(
-                    'TMDB access token is not configured',
-                    HttpStatus.INTERNAL_SERVER_ERROR
-                )
-            }
-
             const apiPage = Math.ceil(page / 2)
 
-            const startIndex = page % 2 === 1 ? 0 : 10
-            const endIndex = page % 2 === 1 ? 10 : 20
+            const startIndex = page % 2 ? 0 : 10
+            const endIndex = page % 2 ? 10 : 20
 
-            const cacheKey = `films:${query}:${apiPage}`
+            const cacheKey = `films:${query || 'popular'}:${apiPage}`
 
             let responseData = await this.cacheManager.get<TMDBResponse>(cacheKey)
 
             if (!responseData) {
                 const url = new URL(endpoint)
 
-                // Only append query parameter for search endpoint
-                if (query.trim()) {
-                    url.searchParams.append('query', query)
-                }
-                url.searchParams.append('page', apiPage.toString())
+                url.searchParams.append('query', query || '')
+                url.searchParams.append('page', String(apiPage))
 
                 const response = await fetch(url.toString(), {
                     method: 'GET',
@@ -76,10 +73,10 @@ export class FilmsService {
             const totalPages = responseData.total_pages ? responseData.total_pages * 2 : 1
 
             return {
-                ...responseData,
                 page,
                 results: slicedResults,
-                total_pages: totalPages
+                totalResults: responseData.total_results,
+                totalPages
             }
         } catch (error) {
             logger.error(error)

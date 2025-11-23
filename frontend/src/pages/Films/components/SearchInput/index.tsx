@@ -1,8 +1,7 @@
-import { resetFilms, setFilms, setSearchQuery } from '@/store'
-import { useAppDispatch, useAppSelector } from '@/hooks'
+import { useAppDispatch, useAppSelector, useFetchFilms } from '@/hooks'
+import { resetFilms, setSearchQuery } from '@/store'
 import { useEffect, useRef } from 'react'
 import { Search } from 'lucide-react'
-import { filmsApi } from '@/api'
 import './index.scss'
 
 const SearchInput = () => {
@@ -12,10 +11,7 @@ const SearchInput = () => {
     const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
     const isFirstRender = useRef(true)
 
-    const fetchFilms = async (query?: string, page?: number) => {
-        const { total_pages: totalPages, results: films } = await filmsApi.searchFilms(query, page)
-        dispatch(setFilms({ page: page ?? 1, totalPages, films }))
-    }
+    const { fetchFilms } = useFetchFilms()
 
     useEffect(() => {
         if (isFirstRender.current) {
@@ -29,7 +25,7 @@ const SearchInput = () => {
 
         timeoutRef.current = setTimeout(() => {
             dispatch(resetFilms())
-            fetchFilms(searchQuery)
+            fetchFilms({ query: searchQuery })
         }, 500)
 
         return () => clearTimeout(timeoutRef.current)

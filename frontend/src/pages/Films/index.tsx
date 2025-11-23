@@ -5,39 +5,29 @@ import {
     PaginationSkeleton,
     SearchInput
 } from './components'
-import { useAppDispatch, useAppSelector } from '@/hooks'
+import { useAppSelector, useFetchFilms } from '@/hooks'
 import { Film } from 'lucide-react'
-import { setFilms } from '@/store'
 import { useEffect } from 'react'
-import { filmsApi } from '@/api'
 import './index.scss'
 
 const Films = () => {
-    const dispatch = useAppDispatch()
-    const { isLoading, searchQuery, currentPage, results, totalPages } = useAppSelector(
+    const { isLoading, searchQuery, currentPage, pageResults } = useAppSelector(
         (state) => state.films
     )
 
-    const films = results[currentPage]
-    const hasFilms = films && films.length > 0
-    const isEmpty = !isLoading && films && films.length === 0
-    const showPagination = totalPages > 0 && !isEmpty
-    const skeletonCount = hasFilms ? films.length : 10
+    const films = pageResults[currentPage]
 
-    const fetchFilms = async (query?: string, page?: number) => {
-        const { total_pages: totalPages, results: films } = await filmsApi.searchFilms(query, page)
-        dispatch(setFilms({ page: page ?? 1, totalPages, films }))
-    }
+    const { fetchFilms } = useFetchFilms()
 
     useEffect(() => {
-        if (results[currentPage]) return
-        fetchFilms(searchQuery, currentPage)
-    }, [currentPage, results])
+        if (pageResults[currentPage]) return
+        fetchFilms({ query: searchQuery, page: currentPage })
+    }, [currentPage, pageResults])
 
     return (
         <div className='films-list-container'>
             <SearchInput />
-            {isEmpty ? (
+            {films?.length === 0 ? (
                 <div className='films-list-empty'>
                     <div className='films-list-empty__content'>
                         <Film className='films-list-empty__icon' size={64} />
@@ -54,19 +44,13 @@ const Films = () => {
             ) : (
                 <div className='films-list'>
                     {isLoading || !films
-                        ? Array.from({ length: skeletonCount }).map((_, index) => (
+                        ? Array.from({ length: 10 }).map((_, index) => (
                               <FilmCardSkeleton key={index} />
                           ))
-                        : hasFilms
-                          ? films.map((film) => <FilmCard key={film.id} film={film} />)
-                          : null}
+                        : films.map((film) => <FilmCard key={film.id} {...film} />)}
                 </div>
             )}
-            {isLoading && totalPages > 0 && !isEmpty ? (
-                <PaginationSkeleton />
-            ) : (
-                showPagination && <Pagination currentPage={currentPage} totalPages={totalPages} />
-            )}
+            {isLoading ? <PaginationSkeleton /> : <Pagination />}
         </div>
     )
 }

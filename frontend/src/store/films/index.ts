@@ -1,14 +1,20 @@
+import type { TMDBFilm, TMDBFilmDetails } from '@/types'
 import type { PayloadAction } from '@reduxjs/toolkit'
 import { createSlice } from '@reduxjs/toolkit'
-import type { TMDBFilm } from '@/types'
 
 interface FilmsState {
     isLoading: boolean
     searchQuery: string
+
     currentPage: number
     totalPages: number
-    results: {
+
+    pageResults: {
         [page: number]: TMDBFilm[]
+    }
+
+    filmDetails: {
+        [id: number]: TMDBFilmDetails
     }
 }
 
@@ -17,7 +23,8 @@ const initialState: FilmsState = {
     searchQuery: '',
     currentPage: 1,
     totalPages: 5,
-    results: {}
+    pageResults: {},
+    filmDetails: {}
 }
 
 const filmsSlice = createSlice({
@@ -27,9 +34,11 @@ const filmsSlice = createSlice({
         setPage: (state, action: PayloadAction<number>) => {
             state.currentPage = action.payload
         },
+
         setSearchQuery: (state, action: PayloadAction<string>) => {
             state.searchQuery = action.payload
         },
+
         setFilms: (
             state,
             action: PayloadAction<{
@@ -44,20 +53,22 @@ const filmsSlice = createSlice({
                 ...state,
                 isLoading: false,
                 totalPages: Math.min(totalPages, 500),
-                results: {
-                    ...state.results,
-                    [page]: films
-                }
+                pageResults: { ...state.pageResults, [page]: films }
             }
         },
+
+        setFilmDetails: (state, action: PayloadAction<TMDBFilmDetails>) => {
+            state.filmDetails[action.payload.id] = action.payload
+        },
+
         resetFilms: (state) => {
             state.isLoading = true
-            state.results = {}
+            state.pageResults = {}
             state.currentPage = 1
         }
     }
 })
 
-export const { setPage, setFilms, setSearchQuery, resetFilms } = filmsSlice.actions
+export const { setPage, setFilms, setSearchQuery, setFilmDetails, resetFilms } = filmsSlice.actions
 
 export default filmsSlice.reducer

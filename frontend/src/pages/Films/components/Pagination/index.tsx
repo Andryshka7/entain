@@ -1,15 +1,12 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react'
-import { useAppDispatch } from '@/hooks'
+import { useAppDispatch, useAppSelector } from '@/hooks'
 import { setPage } from '@/store'
 import './index.scss'
 
-interface Props {
-    currentPage: number
-    totalPages: number
-}
-
-const Pagination = ({ currentPage, totalPages }: Props) => {
+const Pagination = () => {
     const dispatch = useAppDispatch()
+
+    const { currentPage, totalPages } = useAppSelector((store) => store.films)
 
     const handlePageClick = (page: number) => {
         if (page !== currentPage && page >= 1 && page <= totalPages) {
