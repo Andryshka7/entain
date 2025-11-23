@@ -1,4 +1,4 @@
-import { useAppDispatch, useAppSelector, useFetchFilms } from '@/hooks'
+import { useAppDispatch, useAppSelector } from '@/hooks'
 import { resetFilms, setSearchQuery } from '@/store'
 import { useEffect, useRef } from 'react'
 import { Search } from 'lucide-react'
@@ -11,8 +11,6 @@ const SearchInput = () => {
     const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
     const isFirstRender = useRef(true)
 
-    const { fetchFilms } = useFetchFilms()
-
     useEffect(() => {
         if (isFirstRender.current) {
             isFirstRender.current = false
@@ -23,10 +21,7 @@ const SearchInput = () => {
             clearTimeout(timeoutRef.current)
         }
 
-        timeoutRef.current = setTimeout(() => {
-            dispatch(resetFilms())
-            fetchFilms({ query: searchQuery })
-        }, 500)
+        timeoutRef.current = setTimeout(() => dispatch(resetFilms()), 500)
 
         return () => clearTimeout(timeoutRef.current)
     }, [searchQuery])

@@ -5,23 +5,33 @@ import {
     PaginationSkeleton,
     SearchInput
 } from './components'
-import { useAppSelector, useFetchFilms } from '@/hooks'
+import { useAppDispatch, useAppSelector } from '@/hooks'
 import { Film } from 'lucide-react'
+import { setFilms } from '@/store'
 import { useEffect } from 'react'
+import { filmsApi } from '@/api'
 import './index.scss'
 
 const Films = () => {
+    const dispatch = useAppDispatch()
+
     const { isLoading, searchQuery, currentPage, pageResults } = useAppSelector(
         (state) => state.films
     )
 
     const films = pageResults[currentPage]
 
-    const { fetchFilms } = useFetchFilms()
+    const fetchFilms = async () => {
+        const { totalPages, results } = await filmsApi.searchFilms({
+            query: searchQuery,
+            page: currentPage
+        })
+        dispatch(setFilms({ page: currentPage, totalPages, films: results }))
+    }
 
     useEffect(() => {
         if (pageResults[currentPage]) return
-        fetchFilms({ query: searchQuery, page: currentPage })
+        fetchFilms()
     }, [currentPage, pageResults])
 
     return (
